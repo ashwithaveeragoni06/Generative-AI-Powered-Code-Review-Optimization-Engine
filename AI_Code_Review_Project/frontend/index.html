@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Code Review Assistant</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .loading-spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3b82f6;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .pulse-animation {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .gradient-border {
+            background: linear-gradient(45deg, #3b82f6, #8b5cf6, #ec4899);
+            padding: 2px;
+            border-radius: 0.5rem;
+        }
+        
+        .code-textarea {
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            tab-size: 4;
+        }
+        
+        .hover-lift {
+            transition: all 0.3s ease;
+        }
+        
+        .hover-lift:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+        }
+        
+        .glow-effect {
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
+        }
+        
+        .typing-indicator::after {
+            content: '|';
+            animation: blink 1s infinite;
+        }
+        
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+        
+        .syntax-highlight {
+            background: linear-gradient(90deg, 
+                rgba(59, 130, 246, 0.1) 0%, 
+                rgba(139, 92, 246, 0.1) 50%, 
+                rgba(236, 72, 153, 0.1) 100%);
+        }
+        
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .success-glow {
+            box-shadow: 0 0 15px rgba(34, 197, 94, 0.4);
+        }
+        
+        .error-glow {
+            box-shadow: 0 0 15px rgba(239, 68, 68, 0.4);
+        }
+        
+        .warning-glow {
+            box-shadow: 0 0 15px rgba(245, 158, 11, 0.4);
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-gray-900 via-blue-900 to-gray-900 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header -->
+        <header class="text-center mb-10 fade-in">
+            <div class="flex justify-between items-center mb-4">
+                <h1 class="text-4xl md:text-5xl font-bold text-white flex-1">
+                    <i class="fas fa-robot mr-3 text-blue-400"></i>
+                    AI Code Review Assistant
+                </h1>
+                <div class="flex items-center gap-4">
+                    <div class="text-right">
+                        <p id="userEmail" class="text-sm text-gray-300"></p>
+                        <button id="logoutBtn" class="text-xs text-red-400 hover:text-red-300">
+                            <i class="fas fa-sign-out-alt mr-1"></i>Logout
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <p class="text-gray-300 text-lg">Get intelligent code reviews powered by AI</p>
+            <div class="mt-4 flex justify-center gap-4">
+                <span class="glass-effect px-3 py-1 rounded-full text-sm text-gray-300">
+                    <i class="fas fa-bolt text-yellow-400 mr-1"></i> Fast Analysis
+                </span>
+                <span class="glass-effect px-3 py-1 rounded-full text-sm text-gray-300">
+                    <i class="fas fa-shield-alt text-green-400 mr-1"></i> Secure
+                </span>
+                <span class="glass-effect px-3 py-1 rounded-full text-sm text-gray-300">
+                    <i class="fas fa-brain text-purple-400 mr-1"></i> AI Powered
+                </span>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="max-w-6xl mx-auto">
+            <div class="grid md:grid-cols-2 gap-6">
+                <!-- Input Section -->
+                <section class="bg-gray-800 rounded-lg shadow-xl p-6 hover-lift">
+                    <h2 class="text-2xl font-semibold text-white mb-4">
+                        <i class="fas fa-code mr-2 text-green-400"></i>
+                        Your Code
+                    </h2>
+                    
+                    <!-- Language Selector -->
+                    <div class="mb-4">
+                        <label for="language" class="block text-sm font-medium text-gray-300 mb-2">
+                            Programming Language
+                        </label>
+                        <div class="gradient-border">
+                            <select id="language" class="w-full px-4 py-2 bg-gray-700 rounded-lg text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                <option value="python">🐍 Python</option>
+                                <option value="javascript">🟨 JavaScript</option>
+                                <option value="java">☕ Java</option>
+                                <option value="cpp">🔧 C++</option>
+                                <option value="c">🔷 C</option>
+                                <option value="csharp">🔷 C#</option>
+                                <option value="php">🐘 PHP</option>
+                                <option value="ruby">💎 Ruby</option>
+                                <option value="go">🐹 Go</option>
+                                <option value="rust">🦀 Rust</option>
+                                <option value="typescript">📘 TypeScript</option>
+                                <option value="html">🌐 HTML</option>
+                                <option value="css">🎨 CSS</option>
+                                <option value="sql">🗃️ SQL</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <!-- Code Input -->
+                    <div class="mb-4">
+                        <label for="codeInput" class="block text-sm font-medium text-gray-300 mb-2">
+                            Paste Your Code Here
+                        </label>
+                        <div class="gradient-border">
+                            <textarea 
+                                id="codeInput" 
+                                rows="15" 
+                                class="w-full px-4 py-3 bg-gray-700 rounded-lg text-white code-textarea text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none syntax-highlight"
+                                placeholder="Paste your code here for AI review..."
+                            ></textarea>
+                        </div>
+                        <div class="mt-2 flex justify-between items-center">
+                            <span id="charCount" class="text-xs text-gray-400">0 characters</span>
+                            <button id="pasteBtn" class="text-xs text-blue-400 hover:text-blue-300">
+                                <i class="fas fa-paste mr-1"></i>Paste from clipboard
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Action Buttons -->
+                    <div class="flex gap-3">
+                        <button 
+                            id="reviewBtn" 
+                            class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-200 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-800 hover-lift"
+                        >
+                            <i class="fas fa-search mr-2"></i>
+                            Review Code
+                        </button>
+                        <button 
+                            id="rewriteBtn" 
+                            class="flex-1 bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-200 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-gray-800 hover-lift"
+                        >
+                            <i class="fas fa-magic mr-2"></i>
+                            Rewrite Code
+                        </button>
+                        <button 
+                            id="clearBtn" 
+                            class="bg-gray-600 hover:bg-gray-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 focus:ring-offset-gray-800 hover-lift"
+                        >
+                            <i class="fas fa-eraser mr-2"></i>
+                            Clear
+                        </button>
+                    </div>
+                </section>
+
+                <!-- Output Section -->
+                <section class="bg-gray-800 rounded-lg shadow-xl p-6 hover-lift">
+                    <h2 class="text-2xl font-semibold text-white mb-4">
+                        <i class="fas fa-clipboard-check mr-2 text-yellow-400"></i>
+                        AI Review Results
+                    </h2>
+                    
+                    <!-- Loading Indicator -->
+                    <div id="loadingIndicator" class="hidden text-center py-8">
+                        <div class="loading-spinner mx-auto mb-4"></div>
+                        <p class="text-gray-300 typing-indicator">AI is analyzing your code</p>
+                        <div class="mt-4 flex justify-center gap-2">
+                            <span class="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style="animation-delay: 0s;"></span>
+                            <span class="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style="animation-delay: 0.2s;"></span>
+                            <span class="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style="animation-delay: 0.4s;"></span>
+                        </div>
+                    </div>
+                    
+                    <!-- Review Output -->
+                    <div id="reviewOutput" class="hidden">
+                        <div class="mb-4">
+                            <div class="flex justify-between items-center mb-2">
+                                <h3 class="text-lg font-semibold text-white">Review Analysis</h3>
+                                <button id="copyReviewBtn" class="text-sm text-blue-400 hover:text-blue-300">
+                                    <i class="fas fa-copy mr-1"></i>Copy
+                                </button>
+                            </div>
+                            <div class="gradient-border">
+                                <div id="reviewText" class="bg-gray-700 rounded-lg p-4 text-gray-300 whitespace-pre-wrap max-h-96 overflow-y-auto"></div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <h3 class="text-lg font-semibold text-white mb-2">Key Suggestions</h3>
+                            <ul id="suggestionsList" class="space-y-2"></ul>
+                        </div>
+                        
+                        <!-- Action Buttons -->
+                        <div class="mt-4 flex gap-2">
+                            <button id="downloadBtn" class="flex-1 bg-green-600 hover:bg-green-700 text-white text-sm py-2 px-4 rounded-lg transition duration-200">
+                                <i class="fas fa-download mr-1"></i>Download Report
+                            </button>
+                            <button id="shareBtn" class="flex-1 bg-purple-600 hover:bg-purple-700 text-white text-sm py-2 px-4 rounded-lg transition duration-200">
+                                <i class="fas fa-share mr-1"></i>Share
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Empty State -->
+                    <div id="emptyState" class="text-center py-12">
+                        <i class="fas fa-robot text-6xl text-gray-600 mb-4 pulse-animation"></i>
+                        <p class="text-gray-400">Your AI code review will appear here</p>
+                        <p class="text-gray-500 text-sm mt-2">Paste your code and click "Review Code" to get started</p>
+                        <div class="mt-6 grid grid-cols-3 gap-2 text-xs text-gray-500">
+                            <div class="glass-effect p-2 rounded">
+                                <i class="fas fa-bug text-red-400 mb-1"></i>
+                                <p>Bug Detection</p>
+                            </div>
+                            <div class="glass-effect p-2 rounded">
+                                <i class="fas fa-shield-alt text-green-400 mb-1"></i>
+                                <p>Security Check</p>
+                            </div>
+                            <div class="glass-effect p-2 rounded">
+                                <i class="fas fa-chart-line text-blue-400 mb-1"></i>
+                                <p>Performance Tips</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Status Bar -->
+            <div id="statusBar" class="mt-6 bg-gray-800 rounded-lg p-4 hidden">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <i id="statusIcon" class="fas fa-info-circle mr-2"></i>
+                        <span id="statusText" class="text-gray-300"></span>
+                    </div>
+                    <button id="closeStatus" class="text-gray-400 hover:text-white">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="text-center mt-12 text-gray-400">
+            <p>Powered by FastAPI & Groq AI • Built with ❤️ for developers</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,7 @@
+fastapi
+uvicorn
+python-dotenv
+groq
+python-jose[cryptography]
+passlib[bcrypt]
+email-validator

@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - AI Code Review Assistant</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .loading-spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3b82f6;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .hover-lift {
+            transition: all 0.3s ease;
+        }
+        
+        .hover-lift:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+        }
+        
+        .pulse-animation {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .floating {
+            animation: floating 3s ease-in-out infinite;
+        }
+        
+        @keyframes floating {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+            100% { transform: translateY(0px); }
+        }
+        
+        .strength-weak { background-color: #ef4444; }
+        .strength-medium { background-color: #f59e0b; }
+        .strength-strong { background-color: #10b981; }
+        
+        .password-strength-bar {
+            height: 4px;
+            border-radius: 2px;
+            transition: all 0.3s ease;
+        }
+    </style>
+</head>
+<body class="gradient-bg min-h-screen flex items-center justify-center">
+    <!-- Background Animation -->
+    <div class="absolute inset-0 overflow-hidden">
+        <div class="absolute w-96 h-96 bg-purple-300 rounded-full opacity-20 floating -top-20 -left-20"></div>
+        <div class="absolute w-64 h-64 bg-blue-300 rounded-full opacity-20 floating top-1/2 right-10" style="animation-delay: 1s;"></div>
+        <div class="absolute w-80 h-80 bg-indigo-300 rounded-full opacity-20 floating bottom-10 left-1/4" style="animation-delay: 2s;"></div>
+    </div>
+
+    <!-- Signup Container -->
+    <div class="relative z-10 w-full max-w-md mx-4">
+        <!-- Logo and Title -->
+        <div class="text-center mb-8 fade-in">
+            <div class="inline-block p-4 bg-white rounded-full shadow-lg mb-4 pulse-animation">
+                <i class="fas fa-user-plus text-4xl text-purple-600"></i>
+            </div>
+            <h1 class="text-3xl font-bold text-white mb-2">Join AI Code Review</h1>
+            <p class="text-gray-200">Create your account to get started</p>
+        </div>
+
+        <!-- Signup Form -->
+        <div class="glass-effect rounded-2xl shadow-2xl p-8 fade-in hover-lift">
+            <form id="signupForm">
+                <!-- Name Input -->
+                <div class="mb-4">
+                    <label for="name" class="block text-white text-sm font-medium mb-2">
+                        <i class="fas fa-user mr-2"></i>Full Name
+                    </label>
+                    <input 
+                        type="text" 
+                        id="name" 
+                        name="name"
+                        class="w-full px-4 py-3 bg-white/20 border border-white/30 rounded-lg text-white placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                        placeholder="Enter your full name"
+                        required
+                    >
+                </div>
+
+                <!-- Email Input -->
+                <div class="mb-4">
+                    <label for="email" class="block text-white text-sm font-medium mb-2">
+                        <i class="fas fa-envelope mr-2"></i>Email Address
+                    </label>
+                    <input 
+                        type="email" 
+                        id="email" 
+                        name="email"
+                        class="w-full px-4 py-3 bg-white/20 border border-white/30 rounded-lg text-white placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                        placeholder="Enter your email"
+                        required
+                    >
+                </div>
+
+                <!-- Password Input -->
+                <div class="mb-4">
+                    <label for="password" class="block text-white text-sm font-medium mb-2">
+                        <i class="fas fa-lock mr-2"></i>Password
+                    </label>
+                    <div class="relative">
+                        <input 
+                            type="password" 
+                            id="password" 
+                            name="password"
+                            class="w-full px-4 py-3 bg-white/20 border border-white/30 rounded-lg text-white placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                            placeholder="Create a strong password"
+                            required
+                        >
+                        <button 
+                            type="button" 
+                            id="togglePassword"
+                            class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-300 hover:text-white"
+                        >
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                    <!-- Password Strength Indicator -->
+                    <div class="mt-2">
+                        <div class="password-strength-bar" id="strengthBar"></div>
+                        <p id="strengthText" class="text-xs text-gray-300 mt-1">Password strength</p>
+                    </div>
+                </div>
+
+                <!-- Confirm Password -->
+                <div class="mb-6">
+                    <label for="confirmPassword" class="block text-white text-sm font-medium mb-2">
+                        <i class="fas fa-lock mr-2"></i>Confirm Password
+                    </label>
+                    <div class="relative">
+                        <input 
+                            type="password" 
+                            id="confirmPassword" 
+                            name="confirmPassword"
+                            class="w-full px-4 py-3 bg-white/20 border border-white/30 rounded-lg text-white placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                            placeholder="Confirm your password"
+                            required
+                        >
+                        <button 
+                            type="button" 
+                            id="toggleConfirmPassword"
+                            class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-300 hover:text-white"
+                        >
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Terms and Conditions -->
+                <div class="mb-6">
+                    <label class="flex items-start text-white">
+                        <input type="checkbox" id="terms" class="mr-2 mt-1 rounded" required>
+                        <span class="text-sm">
+                            I agree to the 
+                            <a href="#" class="text-purple-200 hover:text-white underline">Terms of Service</a> 
+                            and 
+                            <a href="#" class="text-purple-200 hover:text-white underline">Privacy Policy</a>
+                        </span>
+                    </label>
+                </div>
+
+                <!-- Signup Button -->
+                <button 
+                    type="submit" 
+                    id="signupBtn"
+                    class="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-200 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-purple-600"
+                >
+                    <i class="fas fa-user-plus mr-2"></i>
+                    Create Account
+                </button>
+
+                <!-- Loading State -->
+                <div id="loadingState" class="hidden text-center py-4">
+                    <div class="loading-spinner mx-auto mb-2"></div>
+                    <p class="text-white">Creating your account...</p>
+                </div>
+            </form>
+
+            <!-- Divider -->
+            <div class="flex items-center my-6">
+                <div class="flex-1 h-px bg-white/30"></div>
+                <span class="px-4 text-white text-sm">OR</span>
+                <div class="flex-1 h-px bg-white/30"></div>
+            </div>
+
+            <!-- Social Signup Options -->
+            <div class="space-y-3">
+                <button 
+                    id="googleSignup"
+                    class="w-full bg-white hover:bg-gray-100 text-gray-800 font-medium py-2 px-4 rounded-lg transition duration-200 flex items-center justify-center"
+                >
+                    <i class="fab fa-google mr-2"></i>
+                    Sign up with Google
+                </button>
+                <button 
+                    id="githubSignup"
+                    class="w-full bg-gray-800 hover:bg-gray-900 text-white font-medium py-2 px-4 rounded-lg transition duration-200 flex items-center justify-center"
+                >
+                    <i class="fab fa-github mr-2"></i>
+                    Sign up with GitHub
+                </button>
+            </div>
+
+            <!-- Login Link -->
+            <div class="text-center mt-6">
+                <p class="text-white">
+                    Already have an account? 
+                    <a href="login.html" id="loginLink" class="text-purple-200 hover:text-white font-medium transition">
+                        Sign in
+                    </a>
+                </p>
+            </div>
+        </div>
+
+        <!-- Status Messages -->
+        <div id="statusMessage" class="mt-4 hidden">
+            <div class="glass-effect rounded-lg p-4 text-center">
+                <i id="statusIcon" class="fas fa-info-circle mr-2"></i>
+                <span id="statusText"></span>
+            </div>
+        </div>
+    </div>
+
+    <script src="signup.js"></script>
+</body>
+</html>
